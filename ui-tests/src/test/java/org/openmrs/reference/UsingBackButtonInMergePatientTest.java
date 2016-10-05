@@ -33,9 +33,9 @@ public class UsingBackButtonInMergePatientTest extends TestBase {
         homePage = new HomePage(page);
         assertPage(homePage);
         headerPage = new HeaderPage(driver);
-        registrationPage = new RegistrationPage(driver);
+        registrationPage = new RegistrationPage(page);
         patientDashboardPage = new ClinicianFacingPatientDashboardPage(page);
-        dataManagementPage = new DataManagementPage(driver);
+        dataManagementPage = new DataManagementPage(page);
         patient = new TestPatient();
         patient1 = new TestPatient();
 
@@ -45,27 +45,27 @@ public class UsingBackButtonInMergePatientTest extends TestBase {
     @Ignore //Ignored due to blocking validation
     @Test
     public void usingBackButtonInMergePatientTest() throws Exception {
-        homePage.openRegisterAPatientApp();
+        homePage.goToRegisterPatientApp();
         patient.familyName = "Potter";
         patient.givenName = "John";
         patient.gender = "Male";
         patient.estimatedYears = "45";
         patient.address1 = "address";
-        registrationPage.enterMegrePatient(patient);
+        registrationPage.enterMergePatient(patient);
         id = patientDashboardPage.findPatientId();
-        patient.Uuid =  patientIdFromUrl();
+        patient.uuid =  patientDashboardPage.getPatientUuidFromUrl();
         headerPage.clickOnHomeIcon();
-        homePage.openRegisterAPatientApp();
+        homePage.goToRegisterPatientApp();
         patient1.familyName = "Smith";
         patient1.givenName = "Jane";
         patient1.gender = "Female";
         patient1.estimatedYears = "25";
         patient1.address1 = "address";
-        registrationPage.enterMegrePatient(patient1);
+        registrationPage.enterMergePatient(patient1);
         id2 = patientDashboardPage.findPatientId();
         headerPage.clickOnHomeIcon();
-        homePage.goToDataMagament();
-        dataManagementPage.goToMegrePatient();
+        homePage.goToDataManagement();
+        dataManagementPage.goToMergePatient();
         dataManagementPage.enterPatient1(id);
         dataManagementPage.enterPatient2(id2);
         dataManagementPage.searchId(id);
@@ -79,8 +79,8 @@ public class UsingBackButtonInMergePatientTest extends TestBase {
     @After
     public void tearDown() throws Exception {
         headerPage.clickOnHomeIcon();
-        deletePatient(patient.Uuid);
-        waitForPatientDeletion(patient.Uuid);
+        deletePatient(patient.uuid);
+        waitForPatientDeletion(patient.uuid);
         headerPage.logOut();
     }
 

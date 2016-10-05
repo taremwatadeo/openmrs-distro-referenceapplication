@@ -17,7 +17,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Remote server -->
         <webapp.url>http://int02.openmrs.org/openmrs</webapp.url>
+        <!-- Local server -->
+        <!--<webapp.url>http://localhost:8080/openmrs</webapp.url>-->
         <login.username>admin</login.username>
         <login.password>Admin123</login.password>
         <webdriver>firefox</webdriver>
@@ -76,8 +79,8 @@
                         <configuration>
                         	<groups>org.openmrs.reference.groups.BuildTests</groups>
                             <runOrder>alphabetical</runOrder>
-                          	<parallel>classes</parallel>
-                        	<threadCount>5</threadCount>
+                            <forkCount>5</forkCount>
+                            <reuseForks>true</reuseForks>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -111,10 +114,12 @@
                     <execution>
                         <goals>
                             <goal>integration-test</goal>
+                            <goal>verify</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
+                    <rerunFailingTestsCount>1</rerunFailingTestsCount>
                 	<runOrder>alphabetical</runOrder>
                     <includes>
                         <include>**/*.java</include>

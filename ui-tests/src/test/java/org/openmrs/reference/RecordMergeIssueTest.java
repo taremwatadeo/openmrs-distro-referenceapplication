@@ -33,10 +33,10 @@ public class RecordMergeIssueTest extends TestBase {
         homePage = new HomePage(page);
         assertPage(homePage);
         headerPage = new HeaderPage(driver);
-        findPatientPage = new FindPatientPage(driver);
-        registrationPage = new RegistrationPage(driver);
+        findPatientPage = new FindPatientPage(page);
+        registrationPage = new RegistrationPage(page);
         patientDashboardPage = new ClinicianFacingPatientDashboardPage(page);
-        dataManagementPage = new DataManagementPage(driver);
+        dataManagementPage = new DataManagementPage(page);
         patient = new TestPatient();
         patient1 = new TestPatient();
 
@@ -45,29 +45,29 @@ public class RecordMergeIssueTest extends TestBase {
 
     @Test
     public void recordMergeIssueTest() throws Exception {
-        homePage.openRegisterAPatientApp();
+        homePage.goToRegisterPatientApp();
 //       Register first patient
         patient.familyName = "Mike";
         patient.givenName = "Smith";
         patient.gender = "Male";
         patient.estimatedYears = "25";
         patient.address1 = "address";
-        registrationPage.enterMegrePatient(patient);
+        registrationPage.enterMergePatient(patient);
         id = patientDashboardPage.findPatientId();
-        patient.Uuid = patientIdFromUrl();
+        patient.uuid = patientDashboardPage.getPatientUuidFromUrl();
         headerPage.clickOnHomeIcon();
 //     Register second patient
-        homePage.openRegisterAPatientApp();
+        homePage.goToRegisterPatientApp();
         patient1.familyName = "Mike";
         patient1.givenName = "Kowalski";
         patient1.gender = "Male";
         patient1.estimatedYears = "25";
         patient1.address1 = "address";
-        registrationPage.enterMegrePatient(patient1);
+        registrationPage.enterMergePatient(patient1);
         id2 = patientDashboardPage.findPatientId();
         headerPage.clickOnHomeIcon();
-        homePage.goToDataMagament();
-        dataManagementPage.goToMegrePatient();
+        homePage.goToDataManagement();
+        dataManagementPage.goToMergePatient();
         dataManagementPage.enterPatient1(id);
         dataManagementPage.enterPatient2(id2);
         dataManagementPage.clickOnContinue();
@@ -79,8 +79,8 @@ public class RecordMergeIssueTest extends TestBase {
     @After
     public void tearDown() throws Exception {
         headerPage.clickOnHomeIcon();
-        deletePatient(patient.Uuid);
-        waitForPatientDeletion(patient.Uuid);
+        deletePatient(patient.uuid);
+        waitForPatientDeletion(patient.uuid);
         headerPage.logOut();
     }
 }

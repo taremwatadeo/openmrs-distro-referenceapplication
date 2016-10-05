@@ -13,17 +13,29 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openmrs.reference.groups.BuildTests;
 import org.openmrs.reference.page.ActiveVisitsPage;
+import org.openmrs.uitestframework.test.TestData;
 
 public class SearchActiveVisitsTest extends ReferenceApplicationTestBase {
+
+    TestData.PatientInfo patient;
+
+    @Before
+    public void setup(){
+        patient = createTestPatient();
+        new TestData.TestVisit(patient.uuid, TestData.getAVisitType(), getLocationUuid(homePage)).create();
+    }
 
     @Test
     @Category(BuildTests.class)
     public void searchActiveVisitsByPatientNameOrIdOrLastSeenTest() throws Exception {
         ActiveVisitsPage activeVisitsPage = homePage.goToActiveVisitsSearch();
+        activeVisitsPage.search(patient.identifier);
 
         String patientName = activeVisitsPage.getPatientNameOfLastActiveVisit();
         activeVisitsPage.search(patientName);
@@ -40,5 +52,10 @@ public class SearchActiveVisitsTest extends ReferenceApplicationTestBase {
         String lastSeen = activeVisitsPage.getPatientLastSeenValueOfLastActiveVisit();
         activeVisitsPage.search(lastSeen);
         assertThat(activeVisitsPage.getPatientLastSeenValueOfLastActiveVisit(), is(equalTo(lastSeen)));
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        deletePatient(patient.uuid);
     }
 }

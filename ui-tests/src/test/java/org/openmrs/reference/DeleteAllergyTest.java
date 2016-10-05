@@ -1,69 +1,70 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+
 package org.openmrs.reference;
 
-/**
- * Created by nata on 25.06.15.
- */
-import org.junit.*;
-import static org.junit.Assert.*;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.openmrs.reference.groups.BuildTests;
+import org.openmrs.reference.page.ActiveVisitsPage;
+import org.openmrs.reference.page.AddOrEditAllergyPage;
 import org.openmrs.reference.page.AllergyPage;
-import org.openmrs.reference.page.HeaderPage;
-import org.openmrs.reference.page.HomePage;
 import org.openmrs.reference.page.ClinicianFacingPatientDashboardPage;
-import org.openmrs.uitestframework.test.TestBase;
+import org.openmrs.uitestframework.test.TestData;
 
+import static org.junit.Assert.assertTrue;
 
-public class DeleteAllergyTest extends TestBase {
-    private HomePage homePage;
-    private ClinicianFacingPatientDashboardPage patientDashboardPage;
-    private HeaderPage headerPage;
-    private AllergyPage allergyPage;
+public class DeleteAllergyTest extends ReferenceApplicationTestBase {
 
+    private TestData.PatientInfo patient;
 
+    private static final String DRUG_NAME = "Aspirin";
 
     @Before
     public void setUp() throws Exception {
-
-        
-        homePage = new HomePage(page);
-        assertPage(homePage);
-        patientDashboardPage = new ClinicianFacingPatientDashboardPage(page);
-        headerPage = new HeaderPage(driver);
-        allergyPage = new AllergyPage(driver);
-        homePage.goToActiveVisitPatient();
-
-
+        patient = createTestPatient();
+        createTestVisit();
     }
 
-    @Ignore//ignored due to possible application logout
     @Test
+    @Category(BuildTests.class)
     public void deleteAllergyTest() throws Exception {
+        ActiveVisitsPage activeVisitsPage = homePage.goToActiveVisitsSearch();
+        activeVisitsPage.search(patient.identifier);
+        ClinicianFacingPatientDashboardPage patientDashboardPage = activeVisitsPage.goToPatientDashboardOfLastActiveVisit();
 
-        patientDashboardPage.clickOnAddAllergy();
-        if(allergyPage.deletePresent()){
-            allergyPage.clickOnDeleteAllergy();
-            patientDashboardPage.waitForVisitLinkHidden();
-            allergyPage.clickOnConfirmDeleteAllergy();
-            assertTrue(patientDashboardPage.visitLink().getText().contains("Saved changes"));
-            patientDashboardPage.waitForVisitLinkHidden();
+        AllergyPage allergyPage = patientDashboardPage.clickOnAllergyManagement();
+        createTestAllergy(allergyPage);
 
-        }
-        allergyPage.clickOnAddNewAllergy();
-        allergyPage.enterDrug("Aspirin");
-        allergyPage.drugId();
-        allergyPage.clickOnSaveAllergy();
-        assertTrue(patientDashboardPage.visitLink().getText().contains("New Allergy Saved Successfully"));
         allergyPage.clickOnDeleteAllergy();
-        patientDashboardPage.waitForVisitLinkHidden();
         allergyPage.clickOnConfirmDeleteAllergy();
-        assertTrue(patientDashboardPage.visitLink().getText().contains("Saved changes"));
-        patientDashboardPage.waitForVisitLinkHidden();
+
+        assertTrue(allergyPage.getAllergyStatus().contains("Unknown"));
     }
 
     @After
     public void tearDown() throws Exception {
-        headerPage.clickOnHomeIcon();
-        headerPage.logOut();
+        deletePatient(patient.uuid);
+    }
+
+    private void createTestVisit(){
+        new TestData.TestVisit(patient.uuid, TestData.getAVisitType(), getLocationUuid(homePage)).create();
+    }
+
+    private void createTestAllergy(AllergyPage allergyPage) {
+        AddOrEditAllergyPage addOrEditAllergyPage = allergyPage.clickOnAddNewAllergy();
+        addOrEditAllergyPage.enterDrug(DRUG_NAME);
+        addOrEditAllergyPage.drugId();
+        addOrEditAllergyPage.clickOnSaveAllergy();
     }
 
 }

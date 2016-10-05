@@ -1,17 +1,21 @@
-package org.openmrs.reference.page;
-
 /**
- * Created by nata on 30.06.15.
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
  */
 
+package org.openmrs.reference.page;
 
 import org.openmrs.uitestframework.page.Page;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 
 public class DataManagementPage extends Page {
-    public DataManagementPage(WebDriver driver) {
-        super(driver);
+    public DataManagementPage(Page page) {
+        super(page);
     }
 
     private final static By MERGE_PATIENT_ELECTRONIC_RECORD = By.id("coreapps-mergePatientsHomepageLink-app");
@@ -22,7 +26,11 @@ public class DataManagementPage extends Page {
     private final static By NO = By.id("cancel-button");
     private final static By SEARCH = By.id("patient-search");
 
-    public void goToMegrePatient(){ clickOn(MERGE_PATIENT_ELECTRONIC_RECORD);}
+    public MergePatientsPage goToMergePatient(){
+        clickOn(MERGE_PATIENT_ELECTRONIC_RECORD);
+        return new MergePatientsPage(this);
+    }
+
     public void enterPatient1( String patient1){
         setText(ID_PATIENT_1, patient1);
     }

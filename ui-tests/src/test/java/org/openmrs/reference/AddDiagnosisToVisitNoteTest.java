@@ -9,35 +9,61 @@
  */
 package org.openmrs.reference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.Ignore;
 import org.junit.experimental.categories.Category;
 import org.openmrs.reference.groups.BuildTests;
+import org.openmrs.reference.page.ActiveVisitsPage;
 import org.openmrs.reference.page.ClinicianFacingPatientDashboardPage;
 import org.openmrs.reference.page.VisitNotePage;
+import org.openmrs.uitestframework.test.TestData;
 
+import java.util.List;
 
-public class AddDiagnosisToVisitNoteTest extends ReferenceApplicationTestBase {
-    private ClinicianFacingPatientDashboardPage patientDashboardPage;
-    private VisitNotePage visitNotePage;
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
+
+public class AddDiagnosisToVisitNoteTest extends LocationSensitiveApplicationTestBase {
+
+    private TestData.PatientInfo patient;
+
+    @Before
+    public void setup(){
+        patient = createTestPatient();
+        createTestVisit();
+    }
     
     @Test
-    @Ignore //unstable
     @Category(BuildTests.class)
     public void AddDiagnosisToVisitNoteTest() throws Exception {
-    	
-        patientDashboardPage = homePage.goToActiveVisitPatient();
-        visitNotePage = patientDashboardPage.goToVisitNote();
+
+        ActiveVisitsPage activeVisitsPage = homePage.goToActiveVisitsSearch();
+        activeVisitsPage.search(patient.identifier);
+
+        ClinicianFacingPatientDashboardPage patientDashboardPage = activeVisitsPage.goToPatientDashboardOfLastActiveVisit();
+        VisitNotePage visitNotePage = patientDashboardPage.goToVisitNote();
         visitNotePage.enterDiagnosis("Pne");
         visitNotePage.enterSecondaryDiagnosis("Bleed");
         assertEquals("Pneumonia", visitNotePage.primaryDiagnosis());
         assertEquals("Bleeding", visitNotePage.secondaryDiagnosis());
-        visitNotePage.save();
-        assertNotNull(patientDashboardPage.visitLink());
-        patientDashboardPage.endVisit();
 
+        patientDashboardPage = visitNotePage.save();
+
+        List<String> diagnoses = patientDashboardPage.getDiagnoses();
+        assertThat(diagnoses, hasItems("Pneumonia", "Bleeding"));
+    }
+
+
+
+    @After
+    public void tearDown() throws Exception {
+        //There's a validation error when deleting a patient with a visit note. Some obs has an invalid value and cannot be voided.
+        //deletePatient(patient.uuid);
+    }
+
+    private void createTestVisit(){
+        new TestData.TestVisit(patient.uuid, TestData.getAVisitType(), getLocationUuid(homePage)).create();
     }
 }
